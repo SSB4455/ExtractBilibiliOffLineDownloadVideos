@@ -115,11 +115,11 @@ namespace WindowsFormsApplication1
 				return;
 			}
 			FileInfo[] files = dir.GetFiles("entry.json");
-			FileInfo entryFile = null;
+			FileInfo entryFileinfo = null;
 			if (files != null && files.Length > 0)
 			{
-				entryFile = files[0];
-				EntryFileAddress(entryFile);
+				entryFileinfo = files[0];
+				RnameVideoFromEntryFile(entryFileinfo);
 			}
 			else
 			{
@@ -131,9 +131,34 @@ namespace WindowsFormsApplication1
 			}
 		}
 
-		void EntryFileAddress(FileInfo entryFile)
+		string[] RnameVideoFromEntryFile(FileInfo entryFileInfo)
 		{
-			Console.WriteLine("entryFile = " + entryFile.FullName);
+			Console.WriteLine("entryFile = " + entryFileInfo.FullName);
+			List<string> videoFileAddresss = new List<string>();
+			DirectoryInfo entryFileDir = entryFileInfo.Directory;
+			FileInfo[] files = entryFileDir.GetFiles("*", SearchOption.AllDirectories);
+			for (int i = 0; i < files.Length; i++)
+			{
+				if (files[i].Name.EndsWith(".blv"))
+				{
+					videoFileAddresss.Add(files[i].FullName);
+				}
+				else if (files[i].Name.EndsWith(".flv"))
+				{
+					videoFileAddresss.Add(files[i].FullName);
+				}
+				else if (files[i].Name.EndsWith(".mp4"))
+				{
+					videoFileAddresss.Add(files[i].FullName);
+				}
+			}
+
+			for (int i = 0; i < videoFileAddresss.Count; i++)
+			{
+				Console.WriteLine("videoFileAddresss = " + videoFileAddresss[i]);
+			}
+
+			return videoFileAddresss.ToArray();
 		}
 	}
 }

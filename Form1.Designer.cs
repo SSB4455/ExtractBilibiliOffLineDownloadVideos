@@ -1,4 +1,4 @@
-﻿namespace WindowsFormsApplication1
+﻿namespace extractBilibiliOffLineDownloadVideos
 {
     partial class Form1
     {
@@ -48,7 +48,6 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(590, 25);
             this.textBox1.TabIndex = 1;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // Form1
             // 

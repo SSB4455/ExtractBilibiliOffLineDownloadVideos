@@ -4,12 +4,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 
-namespace WindowsFormsApplication1
+namespace extractBilibiliOffLineDownloadVideos
 {
 	public partial class Form1 : Form
 	{
-		public string topPath;
-		string newName = "";
 
 
 
@@ -20,145 +18,145 @@ namespace WindowsFormsApplication1
 
 		private void button1_Click(object sender, EventArgs e)
 		{
-			//ListFiles(new DirectoryInfo(textBox1.Text));
-			Std(textBox1.Text);
+			ScanTheDirectory(textBox1.Text);
 		}
 
-		private void textBox1_TextChanged(object sender, EventArgs e)
-		{
-
-		}
-
-		public void ListFiles(FileSystemInfo info)
-		{
-			if (!info.Exists) return;
-			DirectoryInfo dir = info as DirectoryInfo;
-			//不是目录 
-			if (dir == null)
-			{
-				return;
-			}
-			FileSystemInfo[] files = dir.GetFileSystemInfos();
-			List<FileInfo> mp4File = new List<FileInfo>();
-			for (int i = 0; i < files.Length; i++)
-			{
-				string newName2 = newName;
-				FileInfo file = files[i] as FileInfo;
-				//是文件 
-				if (file != null)
-				{
-					if (file.FullName.EndsWith("entry.json"))
-					{
-						Console.WriteLine(file.FullName + "\t " + file.Length);
-						Hashtable json = MiniJSON.jsonDecode(File.ReadAllText(file.FullName)) as Hashtable;
-						if (json["title"] != null)
-						{
-							newName2 = json["title"].ToString();
-							if (json["page_data"] != null)
-							{
-								Hashtable page_data = json["page_data"] as Hashtable;
-								if (page_data["part"] != null)
-								{
-									newName2 += page_data["part"].ToString();
-									Console.WriteLine("part");
-								}
-							}
-							Console.WriteLine("title");
-							if (newName2 != newName)
-							{
-								newName = newName2;
-							}
-						}
-						Console.WriteLine("ssstt = " + json["title"] + "\t" + newName);
-						//newName = MiniJSON.jsonDecode(file.FullName).ToString().Split(new string[1]{"title"},StringSplitOptions.None)[1],;
-					}
-					if (System.IO.Path.GetExtension(file.FullName) == ".mp4")
-					{
-						mp4File.Add(file);
-					}
-				}
-				//对于子目录，进行递归调用 
-				else
-				{
-					ListFiles(files[i]);
-				}
-			}
-
-			if (mp4File.Count > 0)
-			{
-				newName = newName.Replace("<", "_").Replace(">", "_").Replace("/", "_").Replace("\\", "_").Replace(":", "_").Replace("*", "_").Replace("?", "_");
-				for (int i = 0; i < mp4File.Count; i++)
-				{
-					if (!File.Exists(textBox1.Text + newName + (mp4File.Count > 1 ? i.ToString() : "") + ".mp4"))
-					{
-						Console.WriteLine("<文件名>" + newName + (mp4File.Count > 1 ? i.ToString() : "") + ".mp4");
-						try
-						{
-							File.Move(mp4File[i].FullName, textBox1.Text + newName + (mp4File.Count > 1 ? i.ToString() : "") + ".mp4");
-						}
-						catch
-						{
-							Random rd = new Random();
-							int r = rd.Next();
-							File.Move(mp4File[i].FullName, textBox1.Text + r + (mp4File.Count > 1 ? i.ToString() : "") + ".mp4");
-						}
-					}
-				}
-			}
-		}
-
-		void Std(string dirPath)
+		public void ScanTheDirectory(string dirPath)
 		{
 			DirectoryInfo dir = new DirectoryInfo(dirPath);
 			if (!dir.Exists)
 			{
 				return;
 			}
-			FileInfo[] files = dir.GetFiles("entry.json");
-			FileInfo entryFileinfo = null;
-			if (files != null && files.Length > 0)
+
+			Dictionary<int, List<VideoEntry>> videoEntryByAvidList = new Dictionary<int, List<VideoEntry>>();
+			FileInfo[] files = dir.GetFiles("entry.json", SearchOption.AllDirectories);
+			for (int i = 0; i < files.Length; i++)
 			{
-				entryFileinfo = files[0];
-				RnameVideoFromEntryFile(entryFileinfo);
-			}
-			else
-			{
-				DirectoryInfo[] dirs = dir.GetDirectories();
-				for (int i = 0; i < dirs.Length; i++)
+				List<VideoEntry> videoEntrys = ScanVideoFromEntryFile(files[i]);
+				if (videoEntrys != null && videoEntrys.Count > 0)
 				{
-					Std(dirs[i].FullName);
+					if (!videoEntryByAvidList.ContainsKey(videoEntrys[0].avid))
+					{
+						videoEntryByAvidList.Add(videoEntrys[0].avid, new List<VideoEntry>());
+					}
+					videoEntryByAvidList[videoEntrys[0].avid].AddRange(videoEntrys);
 				}
 			}
+
+			MoveVideoFiles(videoEntryByAvidList, dirPath);
 		}
 
-		string[] RnameVideoFromEntryFile(FileInfo entryFileInfo)
+		List<VideoEntry> ScanVideoFromEntryFile(FileInfo entryFileInfo)
 		{
 			Console.WriteLine("entryFile = " + entryFileInfo.FullName);
-			List<string> videoFileAddresss = new List<string>();
+			List<FileInfo> videoFiles = new List<FileInfo>();
 			DirectoryInfo entryFileDir = entryFileInfo.Directory;
 			FileInfo[] files = entryFileDir.GetFiles("*", SearchOption.AllDirectories);
 			for (int i = 0; i < files.Length; i++)
 			{
 				if (files[i].Name.EndsWith(".blv"))
 				{
-					videoFileAddresss.Add(files[i].FullName);
+					videoFiles.Add(files[i]);
 				}
 				else if (files[i].Name.EndsWith(".flv"))
 				{
-					videoFileAddresss.Add(files[i].FullName);
+					videoFiles.Add(files[i]);
 				}
 				else if (files[i].Name.EndsWith(".mp4"))
 				{
-					videoFileAddresss.Add(files[i].FullName);
+					videoFiles.Add(files[i]);
 				}
 			}
 
-			for (int i = 0; i < videoFileAddresss.Count; i++)
+			Hashtable json = MiniJSON.jsonDecode(File.ReadAllText(entryFileInfo.FullName)) as Hashtable;
+			if (string.IsNullOrEmpty(json["title"].ToString()))
 			{
-				Console.WriteLine("videoFileAddresss = " + videoFileAddresss[i]);
+				return null;
 			}
+			int avid = (int)((double)json["avid"]);
+			string title = GetWindowsCanUseName(json["title"].ToString());
+			string part = GetWindowsCanUseName((json["page_data"] as Hashtable)["part"].ToString());
+			List<VideoEntry> videoEntrys = new List<VideoEntry>();
+			for (int i = 0; i < videoFiles.Count; i++)
+			{
+				//Console.WriteLine("videoFileAddresss = " + videoFiles[i].FullName);
+				VideoEntry videoEntry = new VideoEntry(avid);
+				videoEntry.videoPath = videoFiles[i].FullName;
+				videoEntry.title = title;
+				videoEntry.part = part;
+				videoEntry.extension = videoFiles[i].Extension;
+				videoEntrys.Add(videoEntry);
+			}
+			return videoEntrys;
+		}
 
-			return videoFileAddresss.ToArray();
+		private void MoveVideoFiles(Dictionary<int, List<VideoEntry>> videoEntryByAvidList, string outPutDir)
+		{
+			List<int> videoIdList = new List<int>(videoEntryByAvidList.Keys);
+			for (int i = 0; i < videoIdList.Count; i++)
+			{
+				List<VideoEntry> videoEntrys = new List<VideoEntry>(videoEntryByAvidList[videoIdList[i]]);
+				if (videoEntrys.Count == 1)
+				{
+					string newPath = outPutDir + Path.DirectorySeparatorChar + videoEntrys[0].title + videoEntrys[0].extension;
+					File.Move(videoEntrys[0].videoPath, newPath);
+				}
+				else if (videoEntrys.Count > 1)
+				{
+					Dictionary<string, List<VideoEntry>> videoEntryByPartList = new Dictionary<string, List<VideoEntry>>();
+					for (int j = 0; j < videoEntrys.Count; j++)
+					{
+						if (!videoEntryByPartList.ContainsKey(videoEntrys[j].part))
+						{
+							videoEntryByPartList.Add(videoEntrys[j].part, new List<VideoEntry>());
+						}
+						videoEntryByPartList[videoEntrys[j].part].Add(videoEntrys[j]);
+					}
+					List<string> partList = new List<string>(videoEntryByPartList.Keys);
+					if (partList.Count == 1)
+					{
+						string newDirectoryPath = outPutDir + Path.DirectorySeparatorChar + videoEntrys[0].title;
+						Directory.CreateDirectory(newDirectoryPath);
+						for (int j = 0; j < videoEntrys.Count; j++)
+						{
+							string newPath = newDirectoryPath + Path.DirectorySeparatorChar + videoEntrys[j].title + "_" + j + videoEntrys[j].extension;
+							File.Move(videoEntrys[j].videoPath, newPath);
+						}
+						//生成自动批处理合成配置文件 最后并执行
+					}
+					// 多part
+					// 多part 每个部分要带title+part 每个part看是否是多文件 多文件按每个part生成文件夹 
+				}
+			}
+		}
+
+		string GetWindowsCanUseName(string orgName)
+		{
+			return orgName.Replace("<", "_").Replace(">", "_").Replace("/", "_").Replace("\\", "_").Replace(":", "_").Replace("*", "_").Replace("?", "_");
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+	internal class VideoEntry
+	{
+		internal int avid;
+		internal string videoPath, title, part, extension;
+
+
+
+		internal VideoEntry(int avid)
+		{
+			this.avid = avid;
 		}
 	}
 }

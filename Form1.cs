@@ -55,7 +55,7 @@ namespace extractBilibiliOffLineDownloadVideos
 			List<FileInfo> videoFiles = new List<FileInfo>();
 			for (int i = 0; i < files.Length; i++)
 			{
-				if (files[i].Name.EndsWith(".blv") || files[i].Name.EndsWith(".flv") ||files[i].Name.EndsWith(".mp4"))
+				if (files[i].Name.EndsWith(".blv") || files[i].Name.EndsWith(".flv") || files[i].Name.EndsWith(".mp4"))
 				{
 					videoFiles.Add(files[i]);
 				}
@@ -115,6 +115,7 @@ namespace extractBilibiliOffLineDownloadVideos
 							File.Move(videoEntrys[j].fileInfo.FullName, newFilePart1 + videoEntrys[j].fileInfo.Name);
 						}
 						//生成自动批处理合成配置文件 最后并执行
+						GenertMergeVideoPlayerList(newDirectoryPath);
 					}
 					else if (partList.Count > 1)
 					{
@@ -123,8 +124,8 @@ namespace extractBilibiliOffLineDownloadVideos
 							newDirectoryPath = outPutDir + Path.DirectorySeparatorChar + videoEntrys[0].title;
 							if (videoEntryByPartList[partList[j]].Count == 1)
 							{
-								string newFilePart1 = newDirectoryPath + Path.DirectorySeparatorChar + videoEntrys[j].title + videoEntrys[j].part;
-								File.Move(videoEntrys[j].fileInfo.FullName, newFilePart1 + videoEntrys[j].fileInfo.Name);
+								string newFilePart1 = newDirectoryPath + Path.DirectorySeparatorChar + videoEntrys[j].part;
+								File.Move(videoEntrys[j].fileInfo.FullName, newFilePart1 + videoEntrys[j].fileInfo.Extension);
 							}
 							else if (videoEntryByPartList[partList[j]].Count > 1)
 							{
@@ -136,6 +137,7 @@ namespace extractBilibiliOffLineDownloadVideos
 									File.Move(videoEntryByPartList[partList[j]][k].fileInfo.FullName, newFilePart1 + videoEntryByPartList[partList[j]][k].fileInfo.Name);
 								}
 								//生成自动批处理合成配置文件 最后并执行
+								GenertMergeVideoPlayerList(newDirectoryPath);
 							}
 						}
 					}
@@ -148,7 +150,7 @@ namespace extractBilibiliOffLineDownloadVideos
 			return orgName.Replace("<", "_").Replace(">", "_").Replace("/", "_").Replace("\\", "_").Replace(":", "_").Replace("*", "_").Replace("?", "_");
 		}
 
-		bool GenertMergeVideoPlayerList(string dirPath, bool executeMerge)
+		bool GenertMergeVideoPlayerList(string dirPath)
 		{
 			DirectoryInfo videosDir = new DirectoryInfo(dirPath);
 			if (!videosDir.Exists)
@@ -156,21 +158,37 @@ namespace extractBilibiliOffLineDownloadVideos
 				return false;
 			}
 
+			string playerListStr = "";
 			FileInfo[] files = videosDir.GetFiles("*");
 			for (int i = 0; i < files.Length; i++)
 			{
+				playerListStr += "file '" + files[i].FullName + ((i < files.Length - 1) ? "'\n" : "");
 			}
-			/*
-			 * ping sz.tencent.com > a.txt
-ping sz1.tencent.com >> a.txt
-ping sz2.tencent.com >> a.txt
-ping sz3.tencent.com >> a.txt
-ping sz4.tencent.com >> a.txt
-ping sz5.tencent.com >> a.txt
-ping sz6.tencent.com >> a.txt
-ping sz7.tencent.com >> a.txt
-exit
-			 * */
+			string playerlistFilePath = dirPath + Path.DirectorySeparatorChar + "playlist";
+			File.WriteAllText(playerlistFilePath, playerListStr);
+
+
+			System.Diagnostics.Process p = new System.Diagnostics.Process();
+			p.StartInfo.FileName = "cmd.exe";
+			p.StartInfo.UseShellExecute = false;			//是否使用操作系统shell启动
+			p.StartInfo.RedirectStandardInput = true;		//接受来自调用程序的输入信息
+			p.StartInfo.RedirectStandardOutput = false;		//由调用程序获取输出信息
+			p.StartInfo.RedirectStandardError = false;		//重定向标准错误输出
+			p.StartInfo.CreateNoWindow = true;				//不显示程序窗口
+			p.Start();										//启动程序
+
+			//向cmd窗口发送输入信息
+			p.StandardInput.WriteLine(videosDir.Root.ToString()[0] + ":");
+			p.StandardInput.WriteLine("cd " + videosDir);
+			p.StandardInput.WriteLine("ffmpeg -f concat -safe 0 -i playlist -c copy outVideo.mp4 &exit");		//防止文件名无效
+			p.StandardInput.AutoFlush = true;
+
+			p.WaitForExit();//等待程序执行完退出进程
+			p.Close();
+			Console.WriteLine("marge finish");
+
+			File.Move(dirPath + Path.DirectorySeparatorChar + "outVideo.mp4", dirPath + ".mp4");
+			videosDir.Delete(true);
 
 			return true;
 		}

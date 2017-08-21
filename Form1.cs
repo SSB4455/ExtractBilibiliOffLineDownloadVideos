@@ -82,10 +82,9 @@ namespace extractBilibiliOffLineDownloadVideos
 			{
 				//Console.WriteLine("videoFileAddresss = " + videoFiles[i].FullName);
 				VideoEntry videoEntry = new VideoEntry(avid);
-				videoEntry.videoPath = videoFiles[i].FullName;
+				videoEntry.fileInfo = videoFiles[i];
 				videoEntry.title = title;
 				videoEntry.part = part;
-				videoEntry.extension = videoFiles[i].Extension;
 				videoEntrys.Add(videoEntry);
 			}
 			return videoEntrys;
@@ -99,8 +98,8 @@ namespace extractBilibiliOffLineDownloadVideos
 				List<VideoEntry> videoEntrys = new List<VideoEntry>(videoEntryByAvidList[videoIdList[i]]);
 				if (videoEntrys.Count == 1)
 				{
-					string newPath = outPutDir + Path.DirectorySeparatorChar + videoEntrys[0].title + videoEntrys[0].extension;
-					File.Move(videoEntrys[0].videoPath, newPath);
+					string newPath = outPutDir + Path.DirectorySeparatorChar + videoEntrys[0].title + videoEntrys[0].fileInfo.Extension;
+					File.Move(videoEntrys[0].fileInfo.FullName, newPath);
 				}
 				else if (videoEntrys.Count > 1)
 				{
@@ -120,8 +119,8 @@ namespace extractBilibiliOffLineDownloadVideos
 						Directory.CreateDirectory(newDirectoryPath);
 						for (int j = 0; j < videoEntrys.Count; j++)
 						{
-							string newPath = newDirectoryPath + Path.DirectorySeparatorChar + videoEntrys[j].title + "_" + j + videoEntrys[j].extension;
-							File.Move(videoEntrys[j].videoPath, newPath);
+							string newPath = newDirectoryPath + Path.DirectorySeparatorChar + videoEntrys[j].title + videoEntrys[j].fileInfo.Name;
+							File.Move(videoEntrys[j].fileInfo.FullName, newPath);
 						}
 						//生成自动批处理合成配置文件 最后并执行
 					}
@@ -150,7 +149,8 @@ namespace extractBilibiliOffLineDownloadVideos
 	internal class VideoEntry
 	{
 		internal int avid;
-		internal string videoPath, title, part, extension;
+		internal FileInfo fileInfo;
+		internal string title, part;
 
 
 

@@ -50,20 +50,12 @@ namespace extractBilibiliOffLineDownloadVideos
 		List<VideoEntry> ScanVideoFromEntryFile(FileInfo entryFileInfo)
 		{
 			Console.WriteLine("entryFile = " + entryFileInfo.FullName);
-			List<FileInfo> videoFiles = new List<FileInfo>();
 			DirectoryInfo entryFileDir = entryFileInfo.Directory;
 			FileInfo[] files = entryFileDir.GetFiles("*", SearchOption.AllDirectories);
+			List<FileInfo> videoFiles = new List<FileInfo>();
 			for (int i = 0; i < files.Length; i++)
 			{
-				if (files[i].Name.EndsWith(".blv"))
-				{
-					videoFiles.Add(files[i]);
-				}
-				else if (files[i].Name.EndsWith(".flv"))
-				{
-					videoFiles.Add(files[i]);
-				}
-				else if (files[i].Name.EndsWith(".mp4"))
+				if (files[i].Name.EndsWith(".blv") || files[i].Name.EndsWith(".flv") ||files[i].Name.EndsWith(".mp4"))
 				{
 					videoFiles.Add(files[i]);
 				}
@@ -103,6 +95,8 @@ namespace extractBilibiliOffLineDownloadVideos
 				}
 				else if (videoEntrys.Count > 1)
 				{
+					string newDirectoryPath = outPutDir + Path.DirectorySeparatorChar + videoEntrys[0].title;
+					Directory.CreateDirectory(newDirectoryPath);
 					Dictionary<string, List<VideoEntry>> videoEntryByPartList = new Dictionary<string, List<VideoEntry>>();
 					for (int j = 0; j < videoEntrys.Count; j++)
 					{
@@ -115,17 +109,36 @@ namespace extractBilibiliOffLineDownloadVideos
 					List<string> partList = new List<string>(videoEntryByPartList.Keys);
 					if (partList.Count == 1)
 					{
-						string newDirectoryPath = outPutDir + Path.DirectorySeparatorChar + videoEntrys[0].title;
-						Directory.CreateDirectory(newDirectoryPath);
 						for (int j = 0; j < videoEntrys.Count; j++)
 						{
-							string newPath = newDirectoryPath + Path.DirectorySeparatorChar + videoEntrys[j].title + videoEntrys[j].fileInfo.Name;
-							File.Move(videoEntrys[j].fileInfo.FullName, newPath);
+							string newFilePart1 = newDirectoryPath + Path.DirectorySeparatorChar + videoEntrys[j].title;
+							File.Move(videoEntrys[j].fileInfo.FullName, newFilePart1 + videoEntrys[j].fileInfo.Name);
 						}
 						//生成自动批处理合成配置文件 最后并执行
 					}
-					// 多part
-					// 多part 每个部分要带title+part 每个part看是否是多文件 多文件按每个part生成文件夹 
+					else if (partList.Count > 1)
+					{
+						for (int j = 0; j < partList.Count; j++)
+						{
+							newDirectoryPath = outPutDir + Path.DirectorySeparatorChar + videoEntrys[0].title;
+							if (videoEntryByPartList[partList[j]].Count == 1)
+							{
+								string newFilePart1 = newDirectoryPath + Path.DirectorySeparatorChar + videoEntrys[j].title + videoEntrys[j].part;
+								File.Move(videoEntrys[j].fileInfo.FullName, newFilePart1 + videoEntrys[j].fileInfo.Name);
+							}
+							else if (videoEntryByPartList[partList[j]].Count > 1)
+							{
+								newDirectoryPath = outPutDir + Path.DirectorySeparatorChar + videoEntrys[0].title
+									+ Path.DirectorySeparatorChar + videoEntrys[j].part;
+								for (int k = 0; k < videoEntryByPartList[partList[j]].Count; k++)
+								{
+									string newFilePart1 = newDirectoryPath + Path.DirectorySeparatorChar + videoEntryByPartList[partList[j]][k].title;
+									File.Move(videoEntryByPartList[partList[j]][k].fileInfo.FullName, newFilePart1 + videoEntryByPartList[partList[j]][k].fileInfo.Name);
+								}
+								//生成自动批处理合成配置文件 最后并执行
+							}
+						}
+					}
 				}
 			}
 		}
@@ -133,6 +146,33 @@ namespace extractBilibiliOffLineDownloadVideos
 		string GetWindowsCanUseName(string orgName)
 		{
 			return orgName.Replace("<", "_").Replace(">", "_").Replace("/", "_").Replace("\\", "_").Replace(":", "_").Replace("*", "_").Replace("?", "_");
+		}
+
+		bool GenertMergeVideoPlayerList(string dirPath, bool executeMerge)
+		{
+			DirectoryInfo videosDir = new DirectoryInfo(dirPath);
+			if (!videosDir.Exists)
+			{
+				return false;
+			}
+
+			FileInfo[] files = videosDir.GetFiles("*");
+			for (int i = 0; i < files.Length; i++)
+			{
+			}
+			/*
+			 * ping sz.tencent.com > a.txt
+ping sz1.tencent.com >> a.txt
+ping sz2.tencent.com >> a.txt
+ping sz3.tencent.com >> a.txt
+ping sz4.tencent.com >> a.txt
+ping sz5.tencent.com >> a.txt
+ping sz6.tencent.com >> a.txt
+ping sz7.tencent.com >> a.txt
+exit
+			 * */
+
+			return true;
 		}
 	}
 

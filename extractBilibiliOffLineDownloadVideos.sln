@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "extractBilibiliOffLineDownloadVideos", "extractBilibiliOffLineDownloadVideos.csproj", "{1669AA29-7B2B-4C82-9519-462B3768D49E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtractBilibiliOffLineDownloadVideos", "ExtractBilibiliOffLineDownloadVideos\ExtractBilibiliOffLineDownloadVideos.csproj", "{1ACB2B72-8DBF-4F6B-BB78-CC9B7ABDF70D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1669AA29-7B2B-4C82-9519-462B3768D49E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1669AA29-7B2B-4C82-9519-462B3768D49E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1669AA29-7B2B-4C82-9519-462B3768D49E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1669AA29-7B2B-4C82-9519-462B3768D49E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1ACB2B72-8DBF-4F6B-BB78-CC9B7ABDF70D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1ACB2B72-8DBF-4F6B-BB78-CC9B7ABDF70D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1ACB2B72-8DBF-4F6B-BB78-CC9B7ABDF70D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1ACB2B72-8DBF-4F6B-BB78-CC9B7ABDF70D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

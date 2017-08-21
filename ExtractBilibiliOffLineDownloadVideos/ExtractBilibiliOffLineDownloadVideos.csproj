@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1669AA29-7B2B-4C82-9519-462B3768D49E}</ProjectGuid>
+    <ProjectGuid>{1ACB2B72-8DBF-4F6B-BB78-CC9B7ABDF70D}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>extractBilibiliOffLineDownloadVideos</RootNamespace>
-    <AssemblyName>extractBilibiliOffLineDownloadVideos</AssemblyName>
+    <RootNamespace>ExtractBilibiliOffLineDownloadVideos</RootNamespace>
+    <AssemblyName>ExtractBilibiliOffLineDownloadVideos</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -73,7 +73,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

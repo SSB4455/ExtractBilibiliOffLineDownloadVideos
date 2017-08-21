@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 
-namespace extractBilibiliOffLineDownloadVideos
+namespace ExtractBilibiliOffLineDownloadVideos
 {
 	public partial class Form1 : Form
 	{
@@ -177,7 +177,7 @@ namespace extractBilibiliOffLineDownloadVideos
 			p.StartInfo.CreateNoWindow = true;				//不显示程序窗口
 			p.Start();										//启动程序
 
-			//向cmd窗口发送输入信息
+			//此处需要安装ffmpeg https://www.ffmpeg.org/download.html
 			p.StandardInput.WriteLine(videosDir.Root.ToString()[0] + ":");
 			p.StandardInput.WriteLine("cd " + videosDir);
 			p.StandardInput.WriteLine("ffmpeg -f concat -safe 0 -i playlist -c copy outVideo.mp4 &exit");		//防止文件名无效
@@ -188,7 +188,10 @@ namespace extractBilibiliOffLineDownloadVideos
 			Console.WriteLine("marge finish");
 
 			File.Move(dirPath + Path.DirectorySeparatorChar + "outVideo.mp4", dirPath + ".mp4");
-			videosDir.Delete(true);
+			if (File.Exists(dirPath + ".mp4"))
+			{
+				videosDir.Delete(true);
+			}
 
 			return true;
 		}

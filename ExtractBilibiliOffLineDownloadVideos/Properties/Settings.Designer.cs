@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace extractBilibiliOffLineDownloadVideos.Properties
+namespace ExtractBilibiliOffLineDownloadVideos.Properties
 {
 
 

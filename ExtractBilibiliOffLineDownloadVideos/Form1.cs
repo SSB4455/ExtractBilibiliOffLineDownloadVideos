@@ -147,7 +147,8 @@ namespace ExtractBilibiliOffLineDownloadVideos
 
 		string GetWindowsCanUseName(string orgName)
 		{
-			return orgName.Replace("<", "_").Replace(">", "_").Replace("/", "_").Replace("\\", "_").Replace(":", "_").Replace("*", "_").Replace("?", "_");
+			return orgName.Replace("<", "_").Replace(">", "_").Replace("/", "_").Replace('\\', '_').Replace(":", "_")
+				.Replace("|", " ").Replace("*", "_").Replace("?", "_").Replace("\"", "_");
 		}
 
 		bool GenertMergeVideoPlayerList(string dirPath)
